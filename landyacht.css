@@ -89,3 +89,15 @@ a.logo-link {
 #content h3 {
 	margin-top: 24px;
 }
+
+.snippet {
+	white-space: nowrap;
+	overflow: auto;
+
+	font-family: monospace;
+
+	background-color: #eeeeee;
+	border: 1px solid #b30000;
+
+	padding: 10px;
+}
