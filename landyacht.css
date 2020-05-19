@@ -79,16 +79,13 @@ a.logo-link {
 #content h2,
 #content h3 {
     font-family: sans-serif;
-}
-
-#content h1 {
-	margin-top: 12px;
+	margin-bottom: 12px
 }
 
 #content h2 {
-	margin-top: 8px;
+	margin-top: 28px;
 }
 
 #content h3 {
-	margin-top: 4px;
+	margin-top: 24px;
 }
