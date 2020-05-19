@@ -65,6 +65,7 @@ a.logo-link {
 @media (max-width: 800px) {
 	#content {
 		width: 100%;
+		margin: 60px auto;
 
 		padding: 10px 15px 10px 15px;
 		
