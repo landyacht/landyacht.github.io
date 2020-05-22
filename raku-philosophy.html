@@ -157,9 +157,9 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 				Stepping back from organically-discovered new features, let's further explore how some seemingly disparate features can be unified. If you come from Perl, you're most likely familiar with the idea of topicalization. If not, the gist is that certain kinds of blocks have a topic variable. That variable is technically named <span class="inline-code">$_</span>, but the idea in Raku is you don't have to refer to it explicitly. The simplest kind of topicalizing block is a <span class="inline-code">given</span> block:
 			</p>
 			<div class="snippet">
-				given 42 {
-&nbsp;&nbsp;&nbsp;&nbsp;.say;
-				}
+				given 42 {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.say;<br/>
+				}<br/>
 				# OUTPUT: 42
 			</div>
 			<p>
@@ -183,20 +183,20 @@ given 42 {<br/>
 			</div>
 			<p> Which outputs </p>
 			<div class="snippet">
-				Midway code
+				Midway code<br/>
 				42 is an Int
 			</div>
 			<p>
 				<span class="inline-code">when</span> blocks do not need to be inside a <span class="inline-code">given</span>. You can put them anywhere you like and their behavior will be consistent. The moral of this story is that the switch/case pattern is a special kind of given/when, which is nothing more than a special case of topicalization with some <span class="inline-code">when</span> statements.
 			</p>
 			<p>
+				There are many more examples, but I'll leave it to the reader to discover those connections organically. 
+			</p>
+			<p>
 				<sup>1</sup> Note that by "control jumps to the end of the outer scope," I don't mean <i>after</i> that scope. This is important to understand before using <span class="inline-code">when</span> in a loop, because a successful match will not exit the loop—it will only skip the rest of the code in that iteration.
 			</p>
 			<p>
-				<sup>2</sup> If you would like smartmatch the topic against a boolean for some reason, you can use <span class="inline-code">.so</span> or <span class="inline-code">! .so</span> to test for truthiness and falsiness, respectively. The <span class="inline-code">so</span> method bool-ifies its callee (which is the topic variable—recall that method calls without an explicit callee are called on the topic).
-			</p>
-			<p>
-				There are a lot more examples I could go over, but I'll leave it to the reader to discover those connections organically. 
+				<sup>2</sup> If you would like to smartmatch the topic against a boolean for some reason, you can use <span class="inline-code">.so</span> or <span class="inline-code">! .so</span> to test for truthiness and falsiness, respectively. The <span class="inline-code">so</span> method bool-ifies its callee (which is the topic variable—recall that method calls without an explicit callee are called on the topic).
 			</p>
 
 			<h2 id="easy_hard"> Easy Things, Hard Things </h2>
