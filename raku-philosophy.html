@@ -25,11 +25,18 @@
 				Recently, I was asked by a curious netizen, "what even is raku philosophy?" While there was certainly a satisfactory answer in my head somewhere, I found myself sadly unable to adequately express it in words. So now, I would like to take a bit more time to consider that question and write up a more well-constructed and complete answer. I do have an ulterior motive, naturally: I want a link I can send next time someone asks me the same question, to save my poor old fingers from writing roughly the same essay many times over.
 			</p>
 			<p>
-				First, I would like to simply list all the mantras without explanation. These are not in any particular order. They are my own views and do not necessarily reflect the opinions of other people in the Raku community, and that's a good thing because mantra #1 is...
+				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry"> Larry Wall </a>.
 			</p>
 			<ul>
-				<li> <a href="#different"> Raku is different things to different people </a> </li>
+				<li>
+					<a href="#different"> Raku is different things to different people </a>
+					<ul>
+						<li> <a href="#scary"> But known footguns should look scary </a> </li>
+						<li> <a href="#consistent"> And everything should be strangely consistent </a> </li>
+					</ul>
+				</li>
 				<li> <a href="#easy_hard"> Easy things should be downright trivial; hard things should be surprisingly simple </a> </li>
+				<li> <a href="#similar_different"> Similar things should look similar; different things should look different</a> </li>
 				<li> <a href="#concise"> Concision begets clarity </a> </li>
 				<li> <a href="#dwim"> Do What I Mean (DWIM) </a> </li>
 				<li> <a href="#vocabulary"> We need a standard vocabulary </a> </li>
@@ -50,14 +57,98 @@
 				</li>
 				<li> <a href="#things_pegs"> Hang things on the right peg </a> </li>
 				<li> <a href="#lexical"> Lexical scoping is great </a> </li>
+				<li> <a href="#lta"> </a> </li>
 			</ul>
 
 			<h2 id="different"> Different People, Different Purposes </h2>
 			<p>
-				Part of creating a general-purpose language is understanding that a great variet of people are going to use your language, and they're going to have different goals and ways of approaching problems. Raku, even more than its sister Perl, expects to be used in a myriad of situations.
+				Part of creating a general-purpose language is understanding that a great variety of people are going to use your language, and they're going to have different goals and ways of approaching problems. Raku, even more than its sister Perl, expects to be used in a myriad of situations.
 			</p>
 			<p>
-				Some languages (Python, Rust) take the approach of simply asking programmers to adapt to some standardized way of thinking, typically one in line with the creators' opinions. Raku, on the other hand, tries not to be an opinionated tool. It's quite easy to program in a variety of styles: imperative, object-oriented, functional, declarative, and any mix thereof (and yes, I realize functional ∈ declarative, but both are worth mentioning). 
+				Some languages (Python, Rust) take the approach of simply asking programmers to adapt to some standardized way of thinking, typically one in line with the creators' opinions. Raku, on the other hand, tries not to be an opinionated tool. It's quite easy to program in a variety of styles: imperative, object-oriented, functional, declarative, and any mix thereof (and yes, I realize functional ∈ declarative, but both are worth mentioning). Larry Wall refers to this as the ability to "speak in dialects," and I think that's a good analogy.
+			</p>
+			<p>
+				Raku was designed from the beginning to be a sort of spiderweb toolbelt. If the programmer is accustomed to using a hammer and nails (let's say this represents imperative programming) on every problem, they can certainly pretend the hammer and nails are the only tools present; however, they will benefit unknowingly from the other tools. In our analogy, there would be a magic magnet keeping the nail from going in crooked (the type system and object orientation).
+			</p>
+			<p>
+				All that being said, we do hope folks begin to explore the other offerings and eventually progress toward a mixed style which takes advantage of the right tools in appropriate situations. They are guided not by the language making particular patterns artificially difficult, but by offering patterns that get the job done so much more easily and maintainably.
+			</p>
+
+			<h3 id="scary"> Scary Features, Scary Code </h3>
+			<p>
+				Having spent four paragraphs talking about a lack of limitations and "freeing the programmer," I'd like to dial it back a bit. While Raku doesn't pretend to know what pattern suits the programmer best, years of collective experience point to a number of known traps and footguns—features with greater-than-average liability to be misused and cause serious problems. These features are not outright removed, because they do have uses, but they are kept behind syntax that indicates their level of scariness and/or silliness.
+			</p>
+			<p>
+				Let's take <span class="inline-code"> eval </span> for example. If you're relying on it, you're probably doing something silly, so the language requires you to type something obviously silly to enable its use:
+			</p>
+			<div class="code">
+				use MONKEY-SEE-NO-EVAL;
+			</div>
+			<p>
+				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical"> Lexical scoping is great </a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
+			</p>
+			<p>
+				Not everything is quite as scary as <span class="inline-code"> eval </span> though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank"> phasers </a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out since timing rules are different for them. This is why phaser keywords are in all caps.
+			</p>
+			<p>
+				Here is a small example demonstrating the two ways phasers can be used. The code in the LAST phaser gets its own scope because of the block, but the INIT phaser's scope is the same as the surrounding code so the <span class="inline-code"> $start-time </span> variable is visible.
+			</p>
+			<div class="code">
+for 1..3 -&gt; $i {<br/>
+	LAST {<br/>
+		say 'The loop ended';<br/>
+	}<br/>
+<br/>
+	say $i;<br/>
+}<br/>
+<br/>
+INIT my $start-time = now;<br/>
+say "The program ran for { now - $start-time } seconds.";<br/>
+
+			</div>
+			<p>
+				The above code will output something like the following (with varying runtime, of course):
+			</p>
+			<div class="code">
+				1 <br/> 2 <br/> 3 <br/>
+				The loop ended <br/>
+				The program ran for 0.0022245 seconds.
+			</div>
+			<p>
+				There are a number of other phasers available, including ones for exception handling. After all, handling exceptions is all about executing some code when an event happens, which is exactly what phasers do! While learning Raku, you will notice a common theme of ideas being extracted from certain patterns and made available in a more general form. This leads nicely into our next topic...
+			</p>
+			<h3 id="consistent"> Strangely Consistent </h3>
+			<p>
+				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i> is </i> quite large, which I'll <a href="#vocabulary"> address later </a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. 
+			</p>
+			<p>
+				In the above section, I explained how an exception handler is really just a kind of phaser, but the strange consistency doesn't stop there. Much of the design of Raku comes from finding common ideas between useful features and implementing those features in terms of those common ideas. Sometimes, new features can be created—or more aptly, discovered—by following underlying ideas to their logical conclusions. A good example of this is meta-operators.
+			</p>
+			<p>
+				In functional programming, a very important idea is treating functions as first-class objects. That is, we can refer to what is normally a verb as a noun so that it can be passed around. This enables <i> higher-order functions </i>, or functions that take or return other functions. Higher-order functions give us great expressive power and enable solutions that are both concise and clear.
+			</p>
+			<p>
+				Now, operators are really just subroutines (sometimes functions, but not always) that get called in a different way. This is especially true in Raku, where the user can define arbitrary operators simply by declaring a subroutine with a funny-looking name, and indeed that's how the majority of the standard operators are defined, but <a href="#operators"> the rest of that discussion </a> comes later.
+			</p>
+			<p>
+				So, if operators are just funny subroutines, and we can create higher-order subroutines, why not create higher-order operators as well? In Raku, it's entirely possible; in fact, several exist in the standard library. Because "higher-order operators" is a bit long, we call these metaoperators. Personally I think the term implies the subroutine being treated as a noun is an operator (which is not always the case), but when operators are really just subroutines, making that distinction is pointless and pedantic. 
+			</p>
+			<p>
+				All this sounds rather abstract, so let's ground it with an example. Let's say we want to form all possible compound words given two lists. The basic operation here is nothing more than cross-product, so let's begin with that. Note that the angle brackets are a word-quoting mechanism.
+			</p>
+			<div class="code">
+				 say &lt; under over &gt; X &lt; worked used &gt;;
+				 # OUTPUT: ((under worked) (under used) (over worked) (over used))
+			</div>
+			<p>
+				That's a good start. The data is in approximately the right form, but really we want the two strings concatenated. We could run the output through a mapping, but let's keep our intention more clear by using the metaoperator form of <span class="inline-code"> X </span> by giving it the string concatenation operator, <span class="inline-code"> ~ </span> as an argument.
+			</p>
+			<div class="code">
+				 say &lt; under over &gt; X~ &lt; worked used &gt;;
+				 # OUTPUT: (underworked underused overworked overused)
+			</div>
+			<p>
+				After all, cross-product is an abstract operation. Constructing two-element lists is merely a sane default which preserves all the original data, but list construction could just as well be string concatenation or any other arity-2 operation.
 			</p>
 		</div>
 	</body>

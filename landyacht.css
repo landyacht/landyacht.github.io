@@ -50,11 +50,11 @@ a.logo-link {
 /* --- body rules --- */
 
 #content {
-    width: 65%;
+    width: 60%;
     margin: 95px auto;
 
     box-sizing: border-box;
-    padding: 30px 45px 35px 45px;
+    padding: 30px 60px 35px 60px;
 
     background-color: white;
     box-shadow: 3px 3px 3px 3px #aaa;
@@ -100,4 +100,9 @@ a.logo-link {
 	border: 1px solid #b30000;
 
 	padding: 10px;
+}
+
+span.inline-code {
+	font-family: monospace;
+	background-color: #eeeeee;
 }
