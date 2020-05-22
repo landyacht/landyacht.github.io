@@ -57,7 +57,7 @@
 				</li>
 				<li> <a href="#things_pegs"> Hang things on the right peg </a> </li>
 				<li> <a href="#lexical"> Lexical scoping is great </a> </li>
-				<li> <a href="#lta"> </a> </li>
+				<li> <a href="#"> </a> </li>
 			</ul>
 
 			<h2 id="different"> Different People, Different Purposes </h2>
@@ -79,21 +79,21 @@
 				Having spent four paragraphs talking about a lack of limitations and "freeing the programmer," I'd like to dial it back a bit. While Raku doesn't pretend to know what pattern suits the programmer best, years of collective experience point to a number of known traps and footguns—features with greater-than-average liability to be misused and cause serious problems. These features are not outright removed, because they do have uses, but they are kept behind syntax that indicates their level of scariness and/or silliness.
 			</p>
 			<p>
-				Let's take <span class="inline-code"> eval </span> for example. If you're relying on it, you're probably doing something silly, so the language requires you to type something obviously silly to enable its use:
+				Let's take <span class="inline-code">eval</span> for example. If you're relying on it, you're probably doing something silly, so the language requires you to type something obviously silly to enable its use:
 			</p>
-			<div class="code">
+			<div class="snippet">
 				use MONKEY-SEE-NO-EVAL;
 			</div>
 			<p>
-				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical"> Lexical scoping is great </a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
+				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical"> Lexical Scoping </a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
 			</p>
 			<p>
-				Not everything is quite as scary as <span class="inline-code"> eval </span> though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank"> phasers </a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out since timing rules are different for them. This is why phaser keywords are in all caps.
+				Not everything is quite as scary as <span class="inline-code">eval</span> though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank">phasers</a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out since timing rules are different for them. This is why phaser keywords are in all caps.
 			</p>
 			<p>
-				Here is a small example demonstrating the two ways phasers can be used. The code in the LAST phaser gets its own scope because of the block, but the INIT phaser's scope is the same as the surrounding code so the <span class="inline-code"> $start-time </span> variable is visible.
+				Here is a small example demonstrating the two ways phasers can be used. The code in the LAST phaser gets its own scope because of the block, but the INIT phaser's scope is the same as the surrounding code so the <span class="inline-code">$start-time</span> variable is visible.
 			</p>
-			<div class="code">
+			<div class="snippet">
 for 1..3 -&gt; $i {<br/>
 	LAST {<br/>
 		say 'The loop ended';<br/>
@@ -109,7 +109,7 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 			<p>
 				The above code will output something like the following (with varying runtime, of course):
 			</p>
-			<div class="code">
+			<div class="snippet">
 				1 <br/> 2 <br/> 3 <br/>
 				The loop ended <br/>
 				The program ran for 0.0022245 seconds.
@@ -119,7 +119,7 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 			</p>
 			<h3 id="consistent"> Strangely Consistent </h3>
 			<p>
-				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i> is </i> quite large, which I'll <a href="#vocabulary"> address later </a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. 
+				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i> is </i> quite large, which I'll <a href="#vocabulary">address later</a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. 
 			</p>
 			<p>
 				In the above section, I explained how an exception handler is really just a kind of phaser, but the strange consistency doesn't stop there. Much of the design of Raku comes from finding common ideas between useful features and implementing those features in terms of those common ideas. Sometimes, new features can be created—or more aptly, discovered—by following underlying ideas to their logical conclusions. A good example of this is meta-operators.
@@ -128,7 +128,7 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 				In functional programming, a very important idea is treating functions as first-class objects. That is, we can refer to what is normally a verb as a noun so that it can be passed around. This enables <i> higher-order functions </i>, or functions that take or return other functions. Higher-order functions give us great expressive power and enable solutions that are both concise and clear.
 			</p>
 			<p>
-				Now, operators are really just subroutines (sometimes functions, but not always) that get called in a different way. This is especially true in Raku, where the user can define arbitrary operators simply by declaring a subroutine with a funny-looking name, and indeed that's how the majority of the standard operators are defined, but <a href="#operators"> the rest of that discussion </a> comes later.
+				Now, operators are really just subroutines (sometimes functions, but not always) that get called in a different way. This is especially true in Raku, where the user can define arbitrary operators simply by declaring a subroutine with a funny-looking name, and indeed that's how the majority of the standard operators are defined, but <a href="#operators">the rest of that discussion</a> comes later.
 			</p>
 			<p>
 				So, if operators are just funny subroutines, and we can create higher-order subroutines, why not create higher-order operators as well? In Raku, it's entirely possible; in fact, several exist in the standard library. Because "higher-order operators" is a bit long, we call these metaoperators. Personally I think the term implies the subroutine being treated as a noun is an operator (which is not always the case), but when operators are really just subroutines, making that distinction is pointless and pedantic. 
@@ -136,15 +136,15 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 			<p>
 				All this sounds rather abstract, so let's ground it with an example. Let's say we want to form all possible compound words given two lists. The basic operation here is nothing more than cross-product, so let's begin with that. Note that the angle brackets are a word-quoting mechanism.
 			</p>
-			<div class="code">
-				 say &lt; under over &gt; X &lt; worked used &gt;;
+			<div class="snippet">
+				 say &lt; under over &gt; X &lt; worked used &gt;; <br/>
 				 # OUTPUT: ((under worked) (under used) (over worked) (over used))
 			</div>
 			<p>
-				That's a good start. The data is in approximately the right form, but really we want the two strings concatenated. We could run the output through a mapping, but let's keep our intention more clear by using the metaoperator form of <span class="inline-code"> X </span> by giving it the string concatenation operator, <span class="inline-code"> ~ </span> as an argument.
+				That's a good start. The data is in approximately the right form, but really we want the two strings concatenated. We could run the output through a mapping, but let's keep our intention more clear by using the metaoperator form of <span class="inline-code">X</span> by giving it the string concatenation operator, <span class="inline-code">~</span> as an argument.
 			</p>
-			<div class="code">
-				 say &lt; under over &gt; X~ &lt; worked used &gt;;
+			<div class="snippet">
+				 say &lt; under over &gt; X~ &lt; worked used &gt;; <br/>
 				 # OUTPUT: (underworked underused overworked overused)
 			</div>
 			<p>
