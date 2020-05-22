@@ -25,7 +25,7 @@
 				Recently, I was asked by a curious netizen, "what even is raku philosophy?" While there was certainly a satisfactory answer in my head somewhere, I found myself sadly unable to adequately express it in words. So now, I would like to take a bit more time to consider that question and write up a more well-constructed and complete answer. I do have an ulterior motive, naturally: I want a link I can send next time someone asks me the same question, to save my poor old fingers from writing roughly the same essay many times over.
 			</p>
 			<p>
-				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry"> Larry Wall </a>.
+				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry">Larry Wall</a>.
 			</p>
 			<ul>
 				<li>
@@ -85,10 +85,13 @@
 				use MONKEY-SEE-NO-EVAL;
 			</div>
 			<p>
-				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical"> Lexical Scoping </a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
+				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical">Lexical Scoping</a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
 			</p>
 			<p>
-				Not everything is quite as scary as <span class="inline-code">eval</span> though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank">phasers</a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out visually since timing rules are different for them. This is why phaser keywords are in all caps.
+				Another "feature" that tends to cause a disproportionate amount of pain is floating points. Floating point numbers are essentially an artifact of computer constraints, not of developer needs. Floating point arithmetic is needlessly fraught with pitfalls, especially for novice programmers. This is why Raku uses rationals for fractional numbers by default. Rationals result in obviously true statements like <span class="inline-code">.1 + .2 == .3</span> being true (for the right reasons—not just because of rounding). Naturally, floating point numbers are available, but the user must ask for them when writing their literals (or convert). Correctness by default, performance for those who need it.
+			</p>
+			<p>
+				Not everything is quite as scary as <span class="inline-code">eval</span> and floating points though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank">phasers</a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out visually since timing rules are different for them. This is why phaser keywords are in all caps.
 			</p>
 			<p>
 				Here is a small example demonstrating the two ways phasers can be used. The code in the LAST phaser gets its own scope because of the block, but the INIT phaser's scope is the same as the surrounding code so the <span class="inline-code">$start-time</span> variable is visible.
@@ -148,7 +151,10 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 				 # OUTPUT: (underworked underused overworked overused)
 			</div>
 			<p>
-				After all, cross-product is an abstract operation. Constructing two-element lists is merely a sane default which preserves all the original data, but list construction could just as well be replaced with string concatenation or any other arity-2 operation with the right parameter type.
+				After all, cross-product is an abstract operation. Constructing two-element lists is merely a sane default which preserves all the original data, but list construction could just as well be replaced with string concatenation or any other arity-2 operation with the right parameter types.
+			</p>
+			<p>
+				There are a lot more examples I could go over, but I'll leave it to the reader to discover those connections organically. 
 			</p>
 		</div>
 	</body>
