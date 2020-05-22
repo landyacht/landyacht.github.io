@@ -25,7 +25,7 @@
 				Recently, I was asked by a curious netizen, "what even is raku philosophy?" While there was certainly a satisfactory answer in my head somewhere, I found myself sadly unable to adequately express it in words. So now, I would like to take a bit more time to consider that question and write up a more well-constructed and complete answer. I do have an ulterior motive, naturally: I want a link I can send next time someone asks me the same question, to save my poor old fingers from writing roughly the same essay many times over.
 			</p>
 			<p>
-				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry">Larry Wall</a>.
+				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry" target="_blank">Larry Wall</a>.
 			</p>
 			<ul>
 				<li>
@@ -46,7 +46,7 @@
 					<a href="#objects"> Everything's an object (but let's not be Java) </a>
 					<ul>
 						<li> <a href="#late_bound"> Method calls should be late-bound </a> </li>
-						<li> <a href="#universal_null"> Universal null was (is) a bad idea </a> </li>
+						<li> <a href="#universal_null"> Typeless null was (is) a bad idea </a> </li>
 					</ul>
 				</li>
 				<li>
@@ -122,7 +122,7 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 			</p>
 			<h3 id="consistent"> Strangely Consistent </h3>
 			<p>
-				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i>is</i> quite large, which I'll <a href="#vocabulary">address later</a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. 
+				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i>is</i> quite large, which I'll <a href="#vocabulary">address later</a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. As it turns out, all those different dialects you can speak are not really so separate as they first appear.
 			</p>
 			<p>
 				In the above section, I explained how an exception handler is really just a kind of phaser, but the strange consistency doesn't stop there. Much of the design of Raku comes from finding common ideas between useful features and implementing those features in terms of those common ideas. Sometimes, new features can be created—or more aptly, discovered—by following underlying ideas to their logical conclusions. A good example of this is meta-operators.
@@ -137,7 +137,7 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 				So, if operators are just funny subroutines, and we can create higher-order subroutines, why not create higher-order operators as well? In Raku, it's entirely possible; in fact, several exist in the standard library. Because "higher-order operators" is a bit long, we call these metaoperators. Personally I think the term implies the subroutine being treated as a noun is an operator (which is not always the case), but when operators are really just subroutines, making that distinction is pointless and pedantic. 
 			</p>
 			<p>
-				All this sounds rather abstract, so let's ground it with an example. Let's say we want to form all possible compound words given two lists. The basic operation here is nothing more than cross-product, so let's begin with that. Note that the angle brackets are a word-quoting mechanism.
+				All this sounds rather abstract, so let's ground it with an example. Say we want to form all possible compound words given two lists. The basic operation here is nothing more than cross-product, so let's begin with that. Note that the angle brackets are a word-quoting mechanism.
 			</p>
 			<div class="snippet">
 				 say &lt;under over&gt; X &lt;worked used&gt;; <br/>
@@ -154,7 +154,54 @@ say "The program ran for { now - $start-time } seconds.";<br/>
 				After all, cross-product is an abstract operation. Constructing two-element lists is merely a sane default which preserves all the original data, but list construction could just as well be replaced with string concatenation or any other arity-2 operation with the right parameter types.
 			</p>
 			<p>
+				Stepping back from organically-discovered new features, let's further explore how some seemingly disparate features can be unified. If you come from Perl, you're most likely familiar with the idea of topicalization. If not, the gist is that certain kinds of blocks have a topic variable. That variable is technically named <span class="inline-code">$_</span>, but the idea in Raku is you don't have to refer to it explicitly. The simplest kind of topicalizing block is a <span class="inline-code">given</span> block:
+			</p>
+			<div class="snippet">
+				given 42 {
+&nbsp;&nbsp;&nbsp;&nbsp;.say;
+				}
+				# OUTPUT: 42
+			</div>
+			<p>
+				Here we topicalize on 42. Method calls with no object specified get called on the topic variable. <span class="inline-code">given</span> blocks don't sound terribly useful yet, but once we introduce <span class="inline-code">when</span>, we have everything needed to implement the switch/case pattern. What are <span class="inline-code">when</span> blocks? They are similar to <span class="inline-code">if</span> statements except when their condition is true, control jumps to the end of the outer scope<sup>1</sup> after the code block executes. They also differ from <span class="inline-code">if</span> statements in that, when the condition is not a boolean, rather than trying to coerce it to a boolean, it will smartmatch the topic against that value<sup>2</sup>.
+			</p>
+			<div class="snippet">
+given 42 {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;when Str {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say '42 is a Str?!';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;say 'Midway code';<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;when Int {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say '42 is an Int';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;say 'This should never be executed.';<br/>
+}<br/>
+
+			</div>
+			<p> Which outputs </p>
+			<div class="snippet">
+				Midway code
+				42 is an Int
+			</div>
+			<p>
+				<span class="inline-code">when</span> blocks do not need to be inside a <span class="inline-code">given</span>. You can put them anywhere you like and their behavior will be consistent. The moral of this story is that the switch/case pattern is a special kind of given/when, which is nothing more than a special case of topicalization with some <span class="inline-code">when</span> statements.
+			</p>
+			<p>
+				<sup>1</sup> Note that by "control jumps to the end of the outer scope," I don't mean <i>after</i> that scope. This is important to understand before using <span class="inline-code">when</span> in a loop, because a successful match will not exit the loop—it will only skip the rest of the code in that iteration.
+			</p>
+			<p>
+				<sup>2</sup> If you would like smartmatch the topic against a boolean for some reason, you can use <span class="inline-code">.so</span> or <span class="inline-code">! .so</span> to test for truthiness and falsiness, respectively. The <span class="inline-code">so</span> method bool-ifies its callee (which is the topic variable—recall that method calls without an explicit callee are called on the topic).
+			</p>
+			<p>
 				There are a lot more examples I could go over, but I'll leave it to the reader to discover those connections organically. 
+			</p>
+
+			<h2 id="easy_hard"> Easy Things, Hard Things </h2>
+			<p>
+				The saying for Perl was "easy things should be easy; hard things should be possible." I like to think Raku takes this a step further: easy things are now downright trivial, and hard things are surprisingly simple. 
 			</p>
 		</div>
 	</body>
