@@ -201,7 +201,105 @@ given 42 {<br/>
 
 			<h2 id="easy_hard"> Easy Things, Hard Things </h2>
 			<p>
-				The saying for Perl was "easy things should be easy; hard things should be possible." I like to think Raku takes this a step further: easy things are now downright trivial, and hard things are surprisingly simple. 
+				The saying for Perl was "easy things should be easy; hard things should be possible." I like to think Raku takes this a step further: easy things are now downright trivial, and hard things are surprisingly simple. You might wonder who would disagree with this idea, and why this is even worth mentioning. Interestingly, lots of other languages make the easy stuff hard. Let's start with a very simple example: iteration. Here's how you might do it in a C-like language:
+			</p>
+			<div class="snippet">
+				for (int i = 0; i &lt; 10; i++) { … }
+			</div>
+			<p>
+				I hate to say it, but that's abysmal. We're just iterating ten times with a counter that ranges 0..9. How many times do we find ourselves writing this same loop with a different value in place of <span class="inline-code">10</span>? All the time. Just look how spread out the relevant information (lower bound, upper bound) is, and all that ceremonious line noise which adds no meaning. Here are three progressively better ways of expressing our intent, written in Raku:
+			</p>
+			<div class="snippet">
+				# A range with both endpoints inclusive<br/>
+				for 0..9 -&gt; $i { … }<br/><br/>
+				# A range with the upper bound exclusive, to make it clear we're iterating 10 times<br/>
+				for 0..^10 -&gt; $i { … }<br/><br/>
+				# Ranges like 0..^x happen so often that we provide a shorter prefix operator that elides the 0..<br/>
+				for ^10 -&gt; $i { … }
+			</div>
+			<p>
+				The idea here is to provide very succint ways of expressing the most common patterns to cut down on ceremony code and let the programmer's intent shine through. Sure, the last form is inflexible: its only purpose is creating a very specific type of range that goes from zero up to but not including some number. But, because we want that behavior so often, it's helpful to have shorthand that еlides whichever bits of information are least liable to change. Progressively longer forms are available for progressively less common tasks.
+			</p>
+			<p>
+				Speaking of progressively less common tasks, let's explore some. Say, a range with weird endpoints, a list that counts down instead of up, multiples of 3, powers of two up to 2<sup>128</sup>, the Fibonacci sequence, and the primes. Obviously for the sake of our hardware, we'd like some of these to be lazily evaluated.
+			</p>
+			<div class="snippet">
+				# Include the negative 7, but not the positive seven<br/>
+				-7..^7<br/><br/>
+				# The range operator .. always counts up to prevent unexpected behavior with variable bounds<br/>
+				# So to get a downwards sequence, we use the more generic <a href="https://docs.raku.org/language/operators#listop_..." target="_blank">sequence operator</a> ...<br/>
+				10...1<br/><br/>
+				# The sequence operator can also deduce arithmetic sequences<br/>
+				3, 6... Inf<br/><br/>
+				# ... and geometric ones<br/>
+				1, 2, 4 ... 2¹²⁸<br/><br/>
+				# You can also provide a generator function in the last element of the left-hand list<br/>
+				0, 1, * + * ... Inf<br/><br/>
+				# Because primes can't be generated as such, we have to use a filter (called grep in Raku, after the command-line utility)<br/>
+				# The built-in <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test" target="_blank">Miller-Rabin</a> prime checking method can be used here<br/>
+				# If you would like to implement a non-probabilistic test, you can easily put that in the filter instead.<br/>
+				(2..Inf).grep: *.is-prime
+			</div>
+			<p>
+				First I'd like to point out that we automatically get lazy evaluation where appropriate. The sequence operator knows when reaching the endpoint is obviously infeasible, and will avoid doing too much work even when the endpoint can be reached.
+			</p>
+			<p>
+				As we do less and less standard tasks, we need to use longer forms and provide more relevant information. First we have to step up from the range operator to the sequence operator, then we provide an additional number so the operator can deduce the step, then yet another number to make it clear the sequence is geometric, and eventually we need to provide a generator. Finally, we must go all the way to grepping a sequence.
+			</p>
+			<p>
+				The last two examples might look a bit weird because of the <a href="https://docs.raku.org/type/Whatever" target="_blank">Whatever Star</a>, <span class="inline-code">*</span>. Whatever Stars create auto-currying closures. Think of the asterisks as "whatever I've got." Each new Whatever Star represents an additional parameter. The sequence operator can ask the closure for its arity (call it <i>n</i>) and will pass it the last <i>n</i> elements in the sequence so far. These closures have limited infectiousness so that they <a href="#dwim">do what you mean</a>; if they don't, you should just use a code block. This is actually yet another example of short forms for simple tasks and longer forms for more complicated ones.
+			</p>
+
+			<h2 id="objects"> Object Orientation </h2>
+			<p>
+				Put some content here you dumb bitch ################3
+			</p>
+			<p>
+				The classic example here is a 2-dimensional point class where the point has to reside on a restricted grid. We want to be able to mutate the data inside, and force whoever is constructing point objects to provide initial values for x and y. In addition, we'd like these points to look good when printed. Here's what that looks like in Raku:
+			</p>
+			<div class="snippet">
+class Point {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;subset RestrictedRat of Rat where -10 ≤ * ≤ 10;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;has RestrictedRat ($.x, $.y) is required is rw;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;method gist {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"($!x, $!y)"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+}<br/>
+<br/>
+my $pt = Point.new: x =&gt; 0.0, y =&gt; 0.0;<br/>
+say $pt;<br/>
+<br/>
+$pt.x += 3.2;<br/>
+$pt.y -= 10;<br/>
+say $pt;<br/>
+<br/>
+{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;CATCH {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say 'Exception caught: ' ~ .message;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.resume;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;my $bad1 = Point.new: x =&gt; -11, y =&gt; -3.2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;my $bad2 = Point.new: x =&gt; 0.0;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;$pt.y = 10.1;<br/>
+}<br/>
+
+			</div>
+			Which outputs:
+			<div class="snippet">
+				(0, 0)
+				(3.2, -10)
+				Exception caught: Type check failed in assignment to $!x; expected Point::RestrictedRat but got Int (-11)
+				Exception caught: The attribute '$!y' is required, but you did not provide a value for it.
+				Exception caught: Type check failed in assignment to $!y; expected Point::RestrictedRat but got Rat (10.1)
+			</div>
+			<p>
+				If you have been around the Raku community for any significant amount of time, you've probably seen some variation on this example. Before I explain all the bits and pieces, let me challenge you to replicate this behavior in your object-oriented language of choice. I know for a fact that Java
 			</p>
 		</div>
 	</body>
