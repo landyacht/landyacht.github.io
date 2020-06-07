@@ -241,13 +241,13 @@ given 42 {<br/>
 				(2..Inf).grep: *.is-prime
 			</div>
 			<p>
-				First I'd like to point out that we automatically get lazy evaluation where appropriate. The sequence operator knows when reaching the endpoint is obviously infeasible, and will avoid doing too much work even when the endpoint can be reached.
+				First I'd like to point out that we automatically get lazy evaluation where appropriate. The sequence operator knows when reaching the endpoint is obviously infeasible, and will avoid doing too much work even when the endpoint <i>can</i> be reached.
 			</p>
 			<p>
-				As our tasks become less typical, we need to use longer forms and provide more relevant information. Corresponding to the examples, here are the reasons for the additional length:
+				As our tasks become less typical, we need to use longer forms to provide more relevant information. Corresponding to the examples, here are the reasons for the additional length:
 				<ol>
 					<li> We have to step up from the range operator to the sequence operator </li>
-					<li> We provide an additional number so the sequence operator can deduce the step (3) </li>
+					<li> We provide an additional number so the sequence operator can deduce that the step is 3 </li>
 					<li> Yet another element is provided to make it clear the sequence is geometric this time </li>
 					<li> The sequence isn't simply arithmetic or geometric now, so we provide a generator </li>
 					<li> Providing a generator here would be unwieldy, so instead we create a range and grep </li>
@@ -263,16 +263,16 @@ given 42 {<br/>
 				Enter <a href="https://docs.raku.org/language/grammars" target="_blank">grammars</a>. Grammars are a core feature of Raku, and in fact a Raku grammar is used to parse Raku itself. The programmer simply defines their language in a manner similar to <a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form" target="_blank">EBNF</a> except the rules are powerful Raku regular expressions, and a parser will automatically be generated. Because <a href="https://docs.raku.org/language/regexes" target="_blank">Raku regexes</a> are notably different from (better than) classic <a href="https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions" target="_blank">PCRE</a>'s, an arbitrary example here might be too much to chew on. I'll leave it to the reader to seek out Raku grammars for languages familiar to them. Try the <a href="https://modules.raku.org/t/PARSER" target="_blank">modules directory</a> or GitHub.
 			</p>
 			<p>
-				Sometimes we want to build some structure other than the tree of <span class="inline-code">Match</span> objects that Raku provides by default. This can be done easily with an "actions class", or a class whose structure mirrors that of the grammar. Grammars are, in fact, just special classes where the methods are rules. If an actions class is provided, every time a rule matches, the action method of the same name will be called and given the relevant data. It can return whatever sort of data structure it wants, which will then be available to action methods "higher up the tree" (i.e. methods that correspond to rules in which the current rule is used) in place of the usual textual representation of that data.
+				By default, the parser will give you back a tree of <span class="inline-code">Match</span> objects. However, we often want our data in some other structure. This can be achieved easily with an "actions class", or a class whose structure mirrors that of the grammar. Grammars are, in fact, just special classes where the methods are rules. If an actions class is provided, every time a rule matches, the action method of the same name will be called and given the relevant data. It can return whatever sort of data structure it wants, which will then be available to action methods "higher up the tree" (i.e. methods that correspond to rules in which the current rule is used) instead of the usual textual representation.
 			</p>
 			<p>
-				The awkwardness of an English explanation makes this sound much scarier than it is. As an example, we might have an <span class="inline-code">assignment</span> rule which uses the <span class="inline-code">variable</span> rule inside it. Whatever the <span="inline-code">variable</span> action method returns will be put in the appropriate capture group in the <span class="inline-code">Match</span> object that gets passed to the <span="inline-code">assignment</span> action method. In this way, each action method needs only worry about producing an appropriate representation for itself (potentially using data from its immediate children).
+				The awkwardness of an English explanation makes this sound much scarier than it is. As an example, we might have an <span class="inline-code">assignment</span> rule which uses the <span class="inline-code">variable</span> rule inside it. Whatever the <span class="inline-code">variable</span> action method returns will be put in the appropriate capture group in the <span class="inline-code">Match</span> object that gets passed to the <span class="inline-code">assignment</span> action method. In this way, each action method needs only worry about producing an appropriate representation for itself (potentially using data from its immediate children).
 			</p>
 			<p>
-				The language providing a standard mechanism for parsing tasks significantly increases maintainability while decreasing dependencies. Moreover, it keeps problem-solving vocabulary consistent and standardized, which is beneficial for a number of reasons. In fact, standard vocabulary is our next topic.↓
+				The language providing a standard mechanism for parsing tasks significantly increases maintainability while decreasing dependencies. Moreover, it keeps problem-solving vocabulary consistent and standardized, which is beneficial for a number of reasons. In fact, standard vocabulary is our next topic.
 			</p>
 			<p>
-				<sup>3</sup> <span class="inline-code"> 2, 3, -&gt; *@a { loop (my $i = @a[*-1]; ; $i += 2) { last if $i %% none(@a) }; $i } … Inf </span> (although this is somewhat less than ideal because it does some extraneous checks where the divisor is more than the square root of the dividend)
+				<sup>3</sup> <span class="inline-code"> 2, 3, -&gt; *@a { loop (my $i = @a[*-1] + 2; ; $i += 2) { last if $i %% none(@a) }; $i } … Inf </span> (although this is somewhat less than ideal because it does some extraneous checks where the divisor is more than the square root of the dividend)
 			</p>
 
 			<h2 id="vocabulary"> Standardized Vocabulary </h2>
