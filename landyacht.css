@@ -106,3 +106,12 @@ span.inline-code {
 	font-family: monospace;
 	background-color: #eeeeee;
 }
+
+a.post-list-item {
+	font-size: Large;
+}
+
+p.post-meta {
+	font-color: #505050;
+	font-size: small;
+}
