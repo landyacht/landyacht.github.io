@@ -108,10 +108,12 @@ span.inline-code {
 }
 
 a.post-list-item {
-	font-size: Large;
+	font-weight: bold;
+	font-size: X-LARGE;
 }
 
 p.post-meta {
-	font-color: #505050;
-	font-size: small;
+	margin: 0 0 1em 0;
+	color: #505050;
+	font-size: SMALL;
 }
