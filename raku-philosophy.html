@@ -1,5 +1,6 @@
 <html>
 	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<link rel="stylesheet" href="/landyacht.css" />
 		<title>
 			rouking's wordhole
@@ -269,7 +270,7 @@ given 42 {<br/>
 				The awkwardness of an English explanation makes this sound much scarier than it is. As an example, we might have an <span class="inline-code">assignment</span> rule which uses the <span class="inline-code">variable</span> rule inside it. Whatever the <span class="inline-code">variable</span> action method returns will be put in the appropriate capture group in the <span class="inline-code">Match</span> object that gets passed to the <span class="inline-code">assignment</span> action method. In this way, each action method needs only worry about producing an appropriate representation for itself (potentially using data from its immediate children).
 			</p>
 			<p>
-				The language providing a standard mechanism for parsing tasks significantly increases maintainability while decreasing dependencies. Moreover, it keeps problem-solving vocabulary consistent and standardized, which is beneficial for a number of reasons. In fact, standard vocabulary is our next topic.
+				The language providing a standard mechanism for parsing significantly increases maintainability while decreasing dependencies. Moreover, it keeps problem-solving vocabulary consistent and standardized, which is beneficial for a number of reasons. In fact, standard vocabulary is our next topic.
 			</p>
 			<p>
 				<sup>3</sup> <span class="inline-code"> 2, 3, -&gt; *@a { loop (my $i = @a[*-1] + 2; ; $i += 2) { last if $i %% none(@a) }; $i } … Inf </span> (although this is somewhat less than ideal because it does some extraneous checks where the divisor is more than the square root of the dividend)
