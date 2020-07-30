@@ -73,6 +73,10 @@ a.logo-link {
 
 		border: none;
 	}
+
+	#content p {
+		text-align: justify;
+	}
 }
 
 #content h1, 
