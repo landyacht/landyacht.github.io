@@ -20,7 +20,7 @@
 		</div>
 
 		<div id="content">
-			<h1> The Structure-Refine (-Reduce) Pattern for Quick Tasks </h1>
+			<h1> The Structure-Refine(-Reduce) Pattern for Quick Tasks </h1>
 			<p>
 				Recently, I've noticed a pattern in how I approach short data-munging or computation tasks in the Raku REPL. This is a two- or three-step process which involves:
 			</p>
@@ -37,7 +37,7 @@
 				Finding some data in an HDD involves two operations: rotating the disk and seeking with the head (arm). Our question concerns the head, which can move in toward the center of the disk or out toward the edge. HDDs have several concentric cylinders, and this head movement is what selects a cylinder, while the disk rotates to select a "sector." If this doesn't make sense, check out <a target="_blank" href="https://en.wikipedia.org/wiki/Cylinder-head-sector">the wikipedia article</a> on HDD structure.
 			</p>
 			<p>
-				Sometimes, requests for reads/writes of data come in faster than the disk can process them, and a queue is built up. There are several algorithms for deciding which requests to handle first, and in this example we want to analyze the simple FIFO (first in, first out) algorithm. Specifically, we are interested in how efficient it is for a given queue, in terms of the total number of cylinders across which the head will move while completing that series of requests. Let's say we have the following queue of cylinder numbers, with the first request listed first: 42, 35, 21, 54, 22, 55, 120, 68.
+				Sometimes, requests for reads/writes of data come in faster than the disk can process them, and a queue is built up. There are several algorithms for deciding which requests to handle first, and in this example we will analyze the simple FIFO (first in, first out) algorithm. Specifically, we are interested in how efficient it is for a given queue, in terms of the total number of cylinders across which the head will move while completing that series of requests. Let's say we have the following queue of cylinder numbers, with the first request listed first: 42, 35, 21, 54, 22, 55, 120, 68.
 			</p>
 			<p>
 				Doing this problem on paper, we would probably end up writing something like this:
@@ -50,7 +50,7 @@
 				etc…
 			</div>
 			<p>
-				To get our final answer, we would sum up the third column ignoring the signs. Notice the form the original data (the first two columns) takes, with elements repeated diagonally. I did the subtraction in the form <span class="inline-code">next - previous</span>, but since we are ignoring signs, the inverse is equally valid. So, let's get our data in a useful form, with elements repeated in a list-of-lists.
+				To get our final answer, we would sum up the third column (the distances) ignoring the signs. Notice the form the original data (the first two columns) takes, with elements repeated diagonally. I did the subtraction in the form <span class="inline-code">next - previous</span>, but since we are ignoring signs, the inverse is equally valid. So, let's get our data in a useful form, with elements repeated in a list-of-lists.
 			</p>
 			<div class="snippet">
 				my @cylinders = 42, 35, 21, 54, 22, 55, 120, 68;<br/>
@@ -58,7 +58,7 @@
 				# OUTPUT: ((42 35) (35 21) (21 54) (54 22) (22 55) (55 120) (120 68))
 			</div>
 			<p>
-				And, just that easily, the "structure" part of Structure-Refine-Reduce is done. <span class="inline-code">rotor</span> takes a list of instructions on how to move through the source list and select sublists. In this case, there is only one instruction, a <span class="inline-code">Pair</span> of 2 and -1, which means "take two elements then move the cursor back 1." Since there are no other instructions, <span class="inline-code">rotor</span> will keep repeating this one instruction until no more groups of 2 can be taken from <span class="inline-code">@cylinders</span>. 
+				And, just that easily, the "structure" part of Structure-Refine-Reduce is done. <span class="inline-code">rotor</span> takes a list of instructions on how to move through the source list and select sublists. In this case, there is only one instruction, a <span class="inline-code">Pair</span> of 2 and -1, which means "take two elements then move the cursor back one." Since there are no other instructions, <span class="inline-code">rotor</span> will keep repeating this one instruction until no more groups of 2 can be taken from <span class="inline-code">@cylinders</span>. 
 			</p>
 			<p>
 				Now we want to refine the structured data to make it even more useful for answering our question. Going back to the on-paper process, we see two things need to happen to each pair of cylinder numbers: subtraction and throwing away the sign on the difference (in other words, taking the absolute value). So let's refine our answer accordingly using <span class="inline-code">map</span>.
@@ -66,16 +66,16 @@
 			<div class="snippet">
 				my @cylinders = 42, 35, 21, 54, 22, 55, 120, 68;<br/>
 				say @cylinders.rotor(2 =&gt; -1)<br/>
-				&nbsp;&nbsp;&nbsp;&nbsp;.map: -&gt; [$prev, $next] { abs($next - $prev) };<br/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.map(-&gt; [$prev, $next] { abs($next - $prev) });<br/>
 				# OUTPUT: (7 14 33 32 33 65 52)
 			</div>
 			<p>
-				Since each item passing through map is a list, we used brackets to destructure the data into our parameters, <span class="inline-code">$prev</span> and <span class="inline-code">$next</span>. Then, in the body, we simply do our operations, and out pops a list of distances between consecutively requested cylinders. Our final answer is all these distances added up, so let's use the reduction metaoperator with the <span class="inline-code">+</span> operator to perform the reduction.
+				Since each item passing through our mapping function is a list, we used brackets to destructure the data into our parameters, <span class="inline-code">$prev</span> and <span class="inline-code">$next</span>. Then, in the body, we simply do the operations, and out pops a list of distances between consecutively requested cylinders. Our final answer is all these distances added up, so let's use the reduction metaoperator with the <span class="inline-code">+</span> operator to perform the reduction.
 			</p>
 			<div class="snippet">
 				my @cylinders = 42, 35, 21, 54, 22, 55, 120, 68;<br/>
 				my @distances = @cylinders.rotor(2 =&gt; -1)<br/>
-				&nbsp;&nbsp;&nbsp;&nbsp;.map: -&gt; [$prev, $next] { abs($next - $prev) };<br/>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.map(-&gt; [$prev, $next] { abs($next - $prev) });<br/>
 				say [+] @distances;<br/>
 				# OUTPUT: 236
 			</div>
