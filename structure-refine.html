@@ -74,7 +74,8 @@
 			</p>
 			<div class="snippet">
 				my @cylinders = 42, 35, 21, 54, 22, 55, 120, 68;<br/>
-				my @distances = @cylinders.rotor(2 =&gt; -1)<br/>
+				my @distances =<br/>
+				&nbsp;&nbsp;&nbsp;&nbsp;@cylinders.rotor(2 =&gt; -1)<br/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.map(-&gt; [$prev, $next] { abs($next - $prev) });<br/>
 				say [+] @distances;<br/>
 				# OUTPUT: 236
