@@ -1,0 +1,69 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/landyacht.css" />
+		<title>
+			AoC 2021 Day 1 in Raku - Easy with rotor - rouking's wordhole
+		</title>
+	</head>
+
+	<body>
+		<div id="topbar">
+			<div id="logo" class="topbar-item">
+				<a href="/" class="logo-link"> rouking's wordhole </a>
+			</div>
+			<div class="topbar-item">
+				<a href="/latest.html"> latest </a>
+			</div>
+			<div class="topbar-item">
+				<a href="/all.html"> all posts </a>
+			</div>
+		</div>
+
+		<div id="content">
+			<h1> AoC 2021 Day 1 in Raku - Easy with rotor </h1>
+
+			<h2> Part 1 </h2>
+			<p>
+				Here we are tasked with finding how many times there is an increase between consecutive integers in a list.
+				The input is given to us linebreak-delimited, and I saved this in a file called <span class="inline-code">input-1-1.txt</span>.
+				We will use the <span class="inline-code">.IO</span> method on a string containing this filename to get a handle object, then the <span class="inline-code">.lines</span> method on that to get a list of lines.
+			</p>
+			<p>
+				Now, the data must be structured so we can run a comparison on each consecutive pair of integers,
+					which is easily done with the <span class="inline-code"><a target="_blank" href="https://docs.raku.org/routine/rotor">rotor</a></span> method.
+				Think of <span class="inline-code">rotor</span>'s arguments as a list of instructions which it steps through; in this case there is only one instruction, a <span class="inline-code">Pair</span> of 2 and -1.
+				This means to take two elements to make a list, then step back one element (taking elements steps it forward).
+				The result of this method is a list of lists.
+			</p>
+			<p>
+				We can now make the comparisons using a mapping.
+				Because <span class="inline-code">&lt;</span> is always numeric comparison, it coerces its operands to numbers, so we need not worry about explicity parsing strings into integers.
+				Each list is passed into the anonymous subroutine, which has no parameter list, so the argument gets called <span class="inline-code">$_</span> by default.
+			</p>
+			<p>
+				The result of the mapping is a list of booleans, which are reduced using the reduction metaoperator, <span class="inline-code">[ ]</span>, with the addition operator as its argument.
+				The addition operator is always numeric, so it coerces the booleans to numbers, namely 1 or 0, so the sum does exactly what we want.
+				I could have used the <span class="inline-code">.sum</span> method here too, but I like metaoperators.
+			</p>
+			<div class="snippet">
+say [+] 'input-1-1.txt'.IO.lines.rotor(2 =&gt; -1).map: { $_[0] &lt; $_[1] }<br/>
+			</div>
+
+			<h2>Part 2</h2>
+			<p>
+				Here we have a similar task but with a sliding 3-element window whose values get summed. A similar method is used, but we insert two extra method calls to structure this window and create the window sums.
+				It should be self-explanatory if you understand what <span class="inline-code">rotor</span> does now.
+				Only one note for non-Perl, non-Raku programmers: <span class="inline-code">&amp;</span> is used before the name of a subroutine to refer to it as an object (as opposed to calling it).
+			</p>
+			<div class="snippet">
+say [+] 'input-1-1.txt'.IO.lines<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.rotor(3 =&gt; -2)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.map(&amp;sum)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.rotor(2 =&gt; -1)<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.map: { $_[0] &lt; $_[1] }<br/>
+
+			</div>
+		</div>
+	</body>
+</html>
