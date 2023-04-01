@@ -81,7 +81,8 @@ a.logo-link {
 
 #content h1, 
 #content h2,
-#content h3 {
+#content h3,
+#content h4 {
     font-family: sans-serif;
 	margin-bottom: 12px
 }
@@ -92,6 +93,10 @@ a.logo-link {
 
 #content h3 {
 	margin-top: 24px;
+}
+
+#content h4 {
+	margin-top: 18px;
 }
 
 .snippet {
