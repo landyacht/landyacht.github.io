@@ -1,0 +1,335 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link rel="stylesheet" href="/landyacht.css" />
+		<title>
+			rouking's wordhole
+		</title>
+	</head>
+
+	<body>
+		<div id="topbar">
+			<div id="logo" class="topbar-item">
+				<a href="/" class="logo-link"> rouking's wordhole </a>
+			</div>
+			<div class="topbar-item">
+				<a href="/latest"> latest </a>
+			</div>
+			<div class="topbar-item">
+				<a href="/all"> all posts </a>
+			</div>
+		</div>
+
+		<div id="content">
+			<h1> The Philosophy of Raku </h1>
+			<p>
+				Recently, I was asked by a curious netizen, "what even is raku philosophy?" While there was certainly a satisfactory answer in my head somewhere, I found myself sadly unable to adequately express it in words. So now, I would like to take a bit more time to consider that question and write up a more well-constructed and complete answer. I do have an ulterior motive, naturally: I want a link I can send next time someone asks me the same question, to save my poor old fingers from writing roughly the same essay many times over.
+			</p>
+			<p>
+				First, I will simply list all the mantras without explanation. These are not in any particular order, other than the first one. They are my own views and do not necessarily reflect the opinions of other people using Raku, although some of them are taken directly from other members of the community, including the benevolent dictator himself, <a href="http://wall.org/~larry" target="_blank">Larry Wall</a>.
+			</p>
+			<ul>
+				<li>
+					<a href="#different"> Raku is different things to different people </a>
+					<ul>
+						<li> <a href="#scary"> But known footguns should look scary </a> </li>
+						<li> <a href="#consistent"> And everything should be strangely consistent </a> </li>
+					</ul>
+				</li>
+				<li> <a href="#easy_hard"> Easy things should be downright trivial; hard things should be surprisingly simple </a> </li>
+				<li> <a href="#vocabulary"> We need a standard vocabulary </a> </li>
+				<li> <a href="#similar_different"> Similar things should look similar; different things should look different</a> </li>
+				<li> <a href="#concise"> Concision begets clarity </a> </li>
+				<li> <a href="#dwim"> Do What I Mean (DWIM) </a> </li>
+				<li> <a href="#operators"> Don't overwork your operators </a> </li>
+				<li> <a href="#nouns_verbs_adverbs"> Nouns, verbs, adverbs, and adjectives are different </a> </li>
+				<li>
+					<a href="#objects"> Everything's an object (but let's not be Java) </a>
+					<ul>
+						<li> <a href="#late_bound"> Method calls should be late-bound </a> </li>
+						<li> <a href="#universal_null"> Typeless null was (is) a bad idea </a> </li>
+					</ul>
+				</li>
+				<li>
+					<a href="#modules"> Make fantastic modules possible </a>
+					<ul>
+						<li> <a href="#static_dynamic"> Go beyond static vs. dynamic </a> </li>
+					</ul>
+				</li>
+				<li> <a href="#things_pegs"> Hang things on the right peg </a> </li>
+				<li> <a href="#lexical"> Lexical scoping is great </a> </li>
+				<li> <a href="#"> </a> </li>
+			</ul>
+
+			<h2 id="different"> Different People, Different Purposes </h2>
+			<p>
+				Part of creating a general-purpose language is understanding that a great variety of people are going to use your language, and they're going to have different goals and ways of approaching problems. Raku, even more than its sister Perl, expects to be used in a myriad of situations.
+			</p>
+			<p>
+				Some languages (Python, Rust) take the approach of simply asking programmers to adapt to some standardized way of thinking, typically one in line with the creators' opinions. Raku, on the other hand, tries not to be an opinionated tool. It's quite easy to program in a variety of styles: imperative, object-oriented, functional, declarative, and any mix thereof (and yes, I realize functional ∈ declarative, but both are worth mentioning). Larry Wall refers to this as the ability to "speak in dialects," and I think that's a good analogy.
+			</p>
+			<p>
+				Raku was designed from the beginning to be a sort of spiderweb toolbelt. If the programmer is accustomed to using a hammer and nails (let's say this represents imperative programming) on every problem, they can certainly pretend the hammer and nails are the only tools present; however, they will benefit unknowingly from the other tools. In our analogy, there would be a magic magnet keeping the nail from going in crooked (the type system and object orientation).
+			</p>
+			<p>
+				All that being said, we do hope folks begin to explore the other offerings and eventually progress toward a mixed style which takes advantage of the right tools in appropriate situations. They are guided not by the language making particular patterns artificially difficult, but by offering patterns that get the job done so much more easily and maintainably.
+			</p>
+
+			<h3 id="scary"> Scary Features, Scary Code </h3>
+			<p>
+				Having spent four paragraphs talking about a lack of limitations and "freeing the programmer," I'd like to dial it back a bit. While Raku doesn't pretend to know what pattern suits the programmer best, years of collective experience point to a number of known traps and footguns—features with greater-than-average liability to be misused and cause serious problems. These features are not outright removed, because they do have uses, but they are kept behind syntax that indicates their level of scariness and/or silliness.
+			</p>
+			<p>
+				Let's take <span class="inline-code">eval</span> for example. If you're relying on it, you're probably doing something silly, so the language requires you to type something obviously silly to enable its use:
+			</p>
+			<div class="snippet">
+				use MONKEY-SEE-NO-EVAL;
+			</div>
+			<p>
+				Imagine seeing that at the top of a code block (yes, code block, not file—see <a href="#lexical">Lexical Scoping</a>). The reader knows immediately that the jank level is well above average in the following code, and the writer will think twice about typing such a statement.
+			</p>
+			<p>
+				Another "feature" that tends to cause a disproportionate amount of pain is floating points. Floating point numbers are essentially an artifact of computer constraints, not of developer needs. Floating point arithmetic is needlessly fraught with pitfalls, especially for novice programmers. This is why Raku uses rationals for fractional numbers by default. Rationals result in obviously true statements like <span class="inline-code">.1 + .2 == .3</span> being true (for the right reasons—not just because of rounding). Naturally, floating point numbers are available, but the user must ask for them when writing their literals (or convert). Correctness by default, performance for those who need it.
+			</p>
+			<p>
+				Not everything is quite as scary as <span class="inline-code">eval</span> and floating points though. As another example, let's consider <a href="https://docs.raku.org/language/phasers" target="_blank">phasers</a>. Phasers are bits of code that execute at some specific time outside the normal flow of control. That is, they won't necessarily execute after the code preceeding them and before the code following them. This is only slightly scary because control jumps around code all the time, but it's worth making phasers stand out visually since timing rules are different for them. This is why phaser keywords are in all caps.
+			</p>
+			<p>
+				Here is a small example demonstrating the two ways phasers can be used. The code in the LAST phaser gets its own scope because of the block, but the INIT phaser's scope is the same as the surrounding code so the <span class="inline-code">$start-time</span> variable is visible.
+			</p>
+			<div class="snippet">
+or 1..3 -&gt; $i {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;LAST {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say 'The loop ended';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;say $i;<br/>
+}<br/>
+<br/>
+INIT my $start-time = now;<br/>
+say "The program ran for { now - $start-time } seconds.";<br/>
+
+			</div>
+			<p>
+				The above code will output something like the following (with varying runtime, of course):
+			</p>
+			<div class="snippet">
+				1 <br/> 2 <br/> 3 <br/>
+				The loop ended <br/>
+				The program ran for 0.0022245 seconds.
+			</div>
+			<p>
+				There are a number of other phasers available, including ones for exception handling. After all, handling exceptions is all about executing some code when an event happens, which is exactly what phasers do! While learning Raku, you will notice a common theme of ideas being extracted from certain patterns and made available in a more general form. This leads nicely into our next topic...
+			</p>
+			<h3 id="consistent"> Strangely Consistent </h3>
+			<p>
+				At first glance, Raku appears to be a huge language with a giant, relatively unorganized pile of features. Well, the first part is true: Raku <i>is</i> quite large, which I'll <a href="#vocabulary">address later</a>. What I'd like to address now is the surprisingly strong relationships between these features which only become apparent after some exploration and usage. As it turns out, all those different dialects you can speak are not really so separate as they first appear.
+			</p>
+			<p>
+				In the above section, I explained how an exception handler is really just a kind of phaser, but the strange consistency doesn't stop there. Much of the design of Raku comes from finding common ideas between useful features and implementing those features in terms of those common ideas. Sometimes, new features can be created—or more aptly, discovered—by following underlying ideas to their logical conclusions. A good example of this is meta-operators.
+			</p>
+			<p>
+				In functional programming, a very important idea is treating functions as first-class objects. That is, we can refer to what is normally a verb as a noun so that it can be passed around. This enables <i>higher-order functions</i>, or functions that take or return other functions. Higher-order functions give us great expressive power and enable solutions that are both concise and clear.
+			</p>
+			<p>
+				Now, operators are really just subroutines (sometimes functions, but not always) that get called in a different way. This is especially true in Raku, where the user can define arbitrary operators simply by declaring a subroutine with a funny-looking name, and indeed that's how the majority of the standard operators are defined. I'll talk more about operators <a href="#operators">below</a>.
+			</p>
+			<p>
+				So, if operators are just funny subroutines, and we can create higher-order subroutines, why not create higher-order operators as well? In Raku, it's entirely possible; in fact, several exist in the standard library. Because "higher-order operators" is a bit long, we call these metaoperators. Personally I think the term implies the subroutine being treated as a noun is an operator (which is not always the case), but when operators are really just subroutines, making that distinction is pointless and pedantic. 
+			</p>
+			<p>
+				All this sounds rather abstract, so let's ground it with an example. Say we want to form all possible compound words given two lists. The basic operation here is nothing more than cross-product, so let's begin with that. Note that the angle brackets are a word-quoting mechanism.
+			</p>
+			<div class="snippet">
+				 say &lt;under over&gt; X &lt;worked used&gt;; <br/>
+				 # OUTPUT: ((under worked) (under used) (over worked) (over used))
+			</div>
+			<p>
+				That's a good start. The data is in approximately the right form, but really we want the two strings concatenated. We could run the output through a mapping, but let's keep our intention more clear by using the metaoperator form of <span class="inline-code">X</span> by giving it the string concatenation operator, <span class="inline-code">~</span>, as an argument.
+			</p>
+			<div class="snippet">
+				 say &lt;under over&gt; X~ &lt;worked used&gt;; <br/>
+				 # OUTPUT: (underworked underused overworked overused)
+			</div>
+			<p>
+				After all, cross-product is an abstract operation. Constructing two-element lists is merely a sane default which preserves all the original data, but list construction could just as well be replaced with string concatenation or any other arity-2 operation with the right parameter types.
+			</p>
+			<p>
+				Stepping back from organically-discovered new features, let's further explore how some seemingly disparate features can be unified. If you come from Perl, you're most likely familiar with the idea of topicalization. If not, the gist is that certain kinds of blocks have a topic variable. That variable is technically named <span class="inline-code">$_</span>, but the idea in Raku is you don't have to refer to it explicitly. The simplest kind of topicalizing block is a <span class="inline-code">given</span> block:
+			</p>
+			<div class="snippet">
+				given 42 {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;.say;<br/>
+				}<br/>
+				# OUTPUT: 42
+			</div>
+			<p>
+				Here we topicalize on 42. Method calls with no object specified get called on the topic variable. <span class="inline-code">given</span> blocks don't sound terribly useful yet, but once we introduce <span class="inline-code">when</span>, we have everything needed to implement the switch/case pattern. What are <span class="inline-code">when</span> blocks? They are similar to <span class="inline-code">if</span> statements except when their condition is true, control jumps to the end of the outer scope<sup>1</sup> after the code block executes. They also differ from <span class="inline-code">if</span> statements in that, when the condition is not a boolean, rather than trying to coerce it to a boolean, it will smartmatch the topic against that value<sup>2</sup>.
+			</p>
+			<div class="snippet">
+given 42 {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;when Str {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say '42 is a Str?!';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;say 'Midway code';<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;when Int {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say '42 is an Int';<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;say 'This should never be executed.';<br/>
+}<br/>
+
+			</div>
+			<p> Which outputs </p>
+			<div class="snippet">
+				Midway code<br/>
+				42 is an Int
+			</div>
+			<p>
+				<span class="inline-code">when</span> blocks do not need to be inside a <span class="inline-code">given</span>. You can put them anywhere you like and their behavior will be consistent. The moral of this story is that the switch/case pattern is a special kind of given/when, which is nothing more than a special case of topicalization with some <span class="inline-code">when</span> statements.
+			</p>
+			<p>
+				There are many more examples, but I'll leave it to the reader to discover those connections organically. 
+			</p>
+			<p>
+				<sup>1</sup> Note that by "control jumps to the end of the outer scope," I don't mean <i>after</i> that scope. This is important to understand before using <span class="inline-code">when</span> in a loop, because a successful match will not exit the loop—it will only skip the rest of the code in that iteration.
+			</p>
+			<p>
+				<sup>2</sup> If you would like to smartmatch the topic against a boolean for some reason, you can use <span class="inline-code">.so</span> or <span class="inline-code">! .so</span> to test for truthiness and falsiness, respectively. The <span class="inline-code">so</span> method bool-ifies its callee (which is the topic variable—recall that method calls without an explicit callee are called on the topic).
+			</p>
+
+			<h2 id="easy_hard"> Easy Things, Hard Things </h2>
+			<p>
+				The saying for Perl was "easy things should be easy; hard things should be possible." I like to think Raku takes this a step further: easy things are now downright trivial, and hard things are surprisingly simple. You might wonder who would disagree with this idea, and why this is even worth mentioning. Interestingly, lots of other languages make the easy stuff hard. Let's start with a very simple example: iteration. Here's how you might do it in a C-like language:
+			</p>
+			<div class="snippet">
+				for (int i = 0; i &lt; 10; i++) { … }
+			</div>
+			<p>
+				I hate to say it, but that's abysmal. We're just iterating ten times with a counter that ranges 0..9. How many times do we find ourselves writing this same loop with a different value in place of <span class="inline-code">10</span>? All the time. Just look how spread out the relevant information (lower bound, upper bound) is, and all that ceremonious line noise which adds no meaning. Here are three progressively better ways of expressing our intent, written in Raku:
+			</p>
+			<div class="snippet">
+				# A range with both endpoints inclusive<br/>
+				for 0..9 -&gt; $i { … }<br/><br/>
+				# A range with the upper bound exclusive, to make it clear we're iterating 10 times<br/>
+				for 0..^10 -&gt; $i { … }<br/><br/>
+				# Ranges like 0..^x happen so often that we provide a shorter prefix operator that elides the 0..<br/>
+				for ^10 -&gt; $i { … }
+			</div>
+			<p>
+				The idea here is to provide very succint ways of expressing the most common patterns to cut down on ceremony code and let the programmer's intent shine through. Sure, the last form is inflexible: its only purpose is creating a very specific type of range that goes from zero up to but not including some number. But, because we want that behavior so often, it's helpful to have shorthand that еlides whichever bits of information are least liable to change. Progressively longer forms are available for progressively less common tasks.
+			</p>
+			<p>
+				Speaking of progressively less common tasks, let's explore some. Say, a range with weird endpoints, a sequence that counts down instead of up, multiples of 3, powers of two up to 2<sup>128</sup>, the Fibonacci sequence, and the primes. Obviously for the sake of our hardware, we'd like some of these to be lazily evaluated.
+			</p>
+			<div class="snippet">
+				# Include the positive 7, but not the negative 7<br/>
+				-7^..7<br/><br/>
+				# The range operator .. always counts up to prevent unexpected behavior with variable bounds<br/>
+				# So to get a downwards sequence, we use the more generic <a href="https://docs.raku.org/language/operators#listop_..." target="_blank">sequence operator</a> ...<br/>
+				10...1<br/><br/>
+				# The sequence operator can also deduce arithmetic sequences<br/>
+				3, 6 ... Inf<br/><br/>
+				# And geometric ones!<br/>
+				1, 2, 4 ... 2¹²⁸<br/><br/>
+				# You can also provide a generator function in the last element of the left-hand list<br/>
+				0, 1, * + * ... Inf<br/><br/>
+				# For this task, we'll create a basic range and filter (called grep in Raku, after the command-line utility)<br/>
+				# The built-in <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test" target="_blank">Miller-Rabin</a> prime checking method can be used here<br/>
+				# A sieve is possible using the sequence operator, but it is a bit messy<sup>3</sup>.<br/>
+				(2..Inf).grep: *.is-prime
+			</div>
+			<p>
+				First I'd like to point out that we automatically get lazy evaluation where appropriate. The sequence operator knows when reaching the endpoint is obviously infeasible, and will avoid doing too much work even when the endpoint <i>can</i> be reached.
+			</p>
+			<p>
+				As our tasks become less typical, we need to use longer forms to provide more relevant information. Corresponding to the examples, here are the reasons for the additional length:
+				<ol>
+					<li> We have to step up from the range operator to the sequence operator </li>
+					<li> We provide an additional number so the sequence operator can deduce that the step is 3 </li>
+					<li> Yet another element is provided to make it clear the sequence is geometric this time </li>
+					<li> The sequence isn't simply arithmetic or geometric now, so we provide a generator </li>
+					<li> Providing a generator here would be unwieldy, so instead we create a range and grep </li>
+				</ol>
+			</p>
+			<p>
+				The last two examples might look a bit weird because of the <a href="https://docs.raku.org/type/Whatever" target="_blank">Whatever Star</a>, <span class="inline-code">*</span>. Whatever Stars create auto-currying closures. Think of the asterisks as "whatever I've got." Each new Whatever Star represents an additional parameter. The sequence operator can ask the closure for its arity (call it <i>n</i>) and will pass it the last <i>n</i> elements in the sequence so far. These closures have limited infectiousness so that they <a href="#dwim">do what you mean</a>; if they don't, you should just use a code block. This is actually yet another example of shorter forms for simpler tasks.
+			</p>
+			<p>
+				The above tasks were all relatively easy. Even getting a list of primes isn't all that complicated. What about bigger tasks that are known to cause pain? Parsing is one good example. Writing a parser by hand is a powerful test of patience. And yet parsing is so often necessary—after all, data has to be kept and moved around in some form or another, and different components of a network often have different requirements for the structure of the same data. This is a bad combination: a relatively common problem and a difficult, frustrating solution. It's great when we can let someone else do the hard work and then use their library, but it would be nice if we could whip up our own domain-specific parsers without having to rely on third party tools like yacc.
+			</p>
+			<p>
+				Enter <a href="https://docs.raku.org/language/grammars" target="_blank">grammars</a>. Grammars are a core feature of Raku, and in fact a Raku grammar is used to parse Raku itself. The programmer simply defines their language in a manner similar to <a href="https://en.wikipedia.org/wiki/Extended_Backus%E2%80%93Naur_form" target="_blank">EBNF</a> except the rules are powerful Raku regular expressions, and a parser will automatically be generated. Because <a href="https://docs.raku.org/language/regexes" target="_blank">Raku regexes</a> are notably different from (better than) classic <a href="https://en.wikipedia.org/wiki/Perl_Compatible_Regular_Expressions" target="_blank">PCRE</a>'s, an arbitrary example here might be too much to chew on. I'll leave it to the reader to seek out Raku grammars for languages familiar to them. Try the <a href="https://modules.raku.org/t/PARSER" target="_blank">modules directory</a> or GitHub.
+			</p>
+			<p>
+				By default, the parser will give you back a tree of <span class="inline-code">Match</span> objects. However, we often want our data in some other structure. This can be achieved easily with an "actions class", or a class whose structure mirrors that of the grammar. Grammars are, in fact, just special classes where the methods are rules. If an actions class is provided, every time a rule matches, the action method of the same name will be called and given the relevant data. It can return whatever sort of data structure it wants, which will then be available to action methods "higher up the tree" (i.e. methods that correspond to rules in which the current rule is used) instead of the usual textual representation.
+			</p>
+			<p>
+				The awkwardness of an English explanation makes this sound much scarier than it is. As an example, we might have an <span class="inline-code">assignment</span> rule which uses the <span class="inline-code">variable</span> rule inside it. Whatever the <span class="inline-code">variable</span> action method returns will be put in the appropriate capture group in the <span class="inline-code">Match</span> object that gets passed to the <span class="inline-code">assignment</span> action method. In this way, each action method needs only worry about producing an appropriate representation for itself (potentially using data from its immediate children).
+			</p>
+			<p>
+				The language providing a standard mechanism for parsing significantly increases maintainability while decreasing dependencies. Moreover, it keeps problem-solving vocabulary consistent and standardized, which is beneficial for a number of reasons. In fact, standard vocabulary is our next topic.
+			</p>
+			<p>
+				<sup>3</sup> <span class="inline-code"> 2, 3, -&gt; *@a { loop (my $i = @a[*-1] + 2; ; $i += 2) { last if $i %% none(@a) }; $i } … Inf </span> (although this is somewhat less than ideal because it does some extraneous checks where the divisor is more than the square root of the dividend)
+			</p>
+
+			<h2 id="vocabulary"> Standardized Vocabulary </h2>
+
+
+			<h2 id="objects"> Object Orientation </h2>
+			<p>
+				Put some content here you dumb bitch ################3
+			</p>
+			<p>
+				The classic example here is a 2-dimensional point class where the point has to reside on a restricted grid. We want to be able to mutate the data inside, and force whoever is constructing point objects to provide initial values for x and y. In addition, we'd like these points to look good when printed. Here's what that looks like in Raku:
+			</p>
+			<div class="snippet">
+class Point {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;subset RestrictedReal of Real where -10 ≤ * ≤ 10;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;has RestrictedReal ($.x, $.y) is required is rw;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;method gist {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"($!x, $!y)"<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+}<br/>
+<br/>
+my $pt = Point.new: x =&gt; 0, y =&gt; 0;<br/>
+say $pt;<br/>
+<br/>
+$pt.x += 3.2;<br/>
+$pt.y -= 10;<br/>
+say $pt;<br/>
+<br/>
+{<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;CATCH {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;default {<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;say 'Exception caught: ' ~ .message;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.resume;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;}<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;my $bad1 = Point.new: x =&gt; -11, y =&gt; -3.2;<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;my $bad2 = Point.new: x =&gt; 0;<br/>
+<br/>
+&nbsp;&nbsp;&nbsp;&nbsp;$pt.y = 10.1;<br/>
+}<br/>
+
+			</div>
+			Which outputs:
+			<div class="snippet">
+				(0, 0)<br/>
+				(3.2, -10)<br/>
+				Exception caught: Type check failed in assignment to $!x; expected Point::RestrictedRat but got Int (-11)<br/>
+				Exception caught: The attribute '$!y' is required, but you did not provide a value for it.<br/>
+				Exception caught: Type check failed in assignment to $!y; expected Point::RestrictedRat but got Rat (10.1)
+			</div>
+			<p>
+				If you have been around the Raku community for any significant amount of time, you've probably seen some variation on this example. Before I explain all the bits and pieces, let me challenge you to replicate this behavior in your object-oriented language of choice. I know for a fact that Java
+			</p>
+		</div>
+	</body>
+</html>
